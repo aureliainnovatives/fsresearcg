@@ -21,6 +21,7 @@ Linux/Mac (replace ^ with \ or use \ for line breaks):
 docker run --rm -it \
   -v "$PWD":/app -w /app \
   --network host \
+  -p 4040:4040 \
   bitnami/spark:3.5.1 \
   spark-submit \
   --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.540 \
