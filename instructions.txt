@@ -1,0 +1,10 @@
+
+
+
+docker run --rm -it ^
+  -v "%cd%":/app -w /app ^
+  --network host ^
+  bitnami/spark:3.5.1 ^
+  spark-submit ^
+  --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.540 ^
+  1_ingest_and_time_travel.py
