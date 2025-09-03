@@ -1,6 +1,7 @@
 
 import os
 from pyspark.sql import SparkSession
+from datetime import date
 
 MINIO_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio:9000")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER", "minio")
@@ -24,7 +25,7 @@ spark = (
     .config(f"spark.sql.catalog.{ICEBERG_CATALOG_NAME}.warehouse", WAREHOUSE)
     .getOrCreate()
 )
-
+spark.sparkContext.setLogLevel("WARN")
 spark.sql(f"CREATE DATABASE IF NOT EXISTS {ICEBERG_CATALOG_NAME}.{DB}")
 
 df = (spark.read
@@ -44,11 +45,12 @@ spark.sql(f"SELECT COUNT(*) AS row_count FROM {full_table}").show()
 
 new_rows = spark.createDataFrame(
     [
-        (5, "Nina", "Kulkarni", "UK", "2025-02-20", 230.75),
-        (6, "Vikram", "Iyer", "IN", "2025-03-15", 999.00),
+        (5, "Nina", "Kulkarni", "UK", date(2025, 2, 20), 230.75),
+        (6, "Vikram", "Iyer", "IN", date(2025, 3, 15), 999.00),
     ],
     df.schema
 )
+
 new_rows.write.format("iceberg").mode("append").saveAsTable(full_table)
 
 print("== After append ==")
@@ -61,10 +63,21 @@ snapshots = spark.sql(f"SELECT snapshot_id, committed_at FROM {full_table}.snaps
 first_snapshot_id = snapshots[0]["snapshot_id"]
 
 print("== Time-travel to first snapshot (pre-append) ==")
-df_old = (spark.read
-          .format("iceberg")
-          .option("snapshot-id", str(first_snapshot_id))
-          .load(full_table.replace(".", "/")))
+df_old = (
+    spark.read
+         .format("iceberg")
+         .option("snapshot-id", int(first_snapshot_id))  # int or str both fine
+         .load(f"{ICEBERG_CATALOG_NAME}.{DB}.{TABLE}")   # <-- keep dot notation
+)
+df_old.show(truncate=False)
 print(f"Old row count: {df_old.count()}")
+
+
+# optional SQL time travel
+snap_id = int(first_snapshot_id)
+old_count = spark.sql(
+    f"SELECT COUNT(*) AS c FROM {full_table} VERSION AS OF {snap_id}"
+).collect()[0]["c"]
+print(f"Old row count (SQL VERSION AS OF): {old_count}")
 
 spark.stop()

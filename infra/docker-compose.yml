@@ -21,9 +21,12 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./infra/trino/catalog:/etc/trino/catalog
+      - ./trino/catalog:/etc/trino/catalog
     environment:
       - "JAVA_TOOL_OPTIONS=-Dhttp.proxyHost= -Dhttp.proxyPort="
+    env_file:
+      - ../.env
+      - ./.env
     depends_on: [ minio ]
     networks: [ core-net ]
 
@@ -36,16 +39,35 @@ services:
     ports:
       - "4040:4040"
     volumes:
-      - ./:/app
+      - ../:/app
+      - spark_events:/opt/spark-events     
+    env_file:
+      - ../.env
+      - ./.env
     depends_on: [ minio ]
+    networks: [ core-net ]
+
+  spark-history:
+    image: bitnami/spark:3.5.1
+    container_name: spark-history
+    depends_on: [ spark ]
+    ports:
+      - "18080:18080"
+    volumes:
+      - spark_events:/opt/spark-events
+    command: ["bash","-lc","/opt/bitnami/spark/sbin/start-history-server.sh && tail -f /opt/bitnami/spark/logs/*history*"]
+    environment:
+      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark-events"
     networks: [ core-net ]
 
   api-gateway:
     build:
-      context: ./api
+      context: ../api
       dockerfile: Dockerfile
     container_name: api-gateway
-    env_file: [ ../.env, .env ]
+    env_file:
+      - ../.env
+      - ./.env
     environment:
       API_AUTH_TOKEN: ${API_AUTH_TOKEN}
       S3_ENDPOINT: ${S3_ENDPOINT}
@@ -62,6 +84,7 @@ services:
 
 volumes:
   minio_data:
+  spark_events: {} 
 
 networks:
   core-net:

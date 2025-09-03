@@ -1,0 +1,15 @@
+docker compose -f infra/docker-compose.yml exec spark bash
+spark-submit \
+  --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.540 \
+  /app/jobs/1_ingest_and_time_travel.py
+
+
+spark-submit \                                                           
+  --conf spark.ui.port=4040 \
+  --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:/app/config/log4j.properties" \
+  --conf "spark.executor.extraJavaOptions=-Dlog4j.configuration=file:/app/config/log4j.properties" \
+  --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.540 \
+  /app/jobs/1_ingest_and_time_travel.py
+  
+--> Browse http://localhost:8080/
+
