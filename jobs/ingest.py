@@ -17,8 +17,7 @@ parser.add_argument("--mode", default="overwrite", choices=["overwrite","append"
 parser.add_argument("--header", default="true")
 parser.add_argument("--infer-schema", default="true")
 args = parser.parse_args()
-
-warehouse = f"{WAREHOUSE_ROOT}/{args.instance_id}"
+warehouse = WAREHOUSE_ROOT 
 catalog_name = "iceberg"
 db = args.instance_id
 full_table = f"{catalog_name}.{db}.{args.table}"
