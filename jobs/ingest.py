@@ -6,7 +6,7 @@ from pyspark.sql import SparkSession
 MINIO_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio:9000")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER", "minio")
 MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD", "minio123")
-WAREHOUSE_ROOT = os.getenv("ICEBERG_WAREHOUSE", "s3://warehouse/iceberg")
+WAREHOUSE_ROOT = os.getenv("ICEBERG_WAREHOUSE", "s3a://warehouse/iceberg")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--instance-id", required=True)
