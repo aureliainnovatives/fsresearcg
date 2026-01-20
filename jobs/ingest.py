@@ -24,7 +24,6 @@ full_table = f"{catalog_name}.{db}.{args.table}"
 
 spark = (
     SparkSession.builder.appName(f"ingest-{args.instance_id}-{args.table}")
-    .config("spark.hadoop.fs.s3.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
     .config("spark.hadoop.fs.s3a.endpoint", MINIO_ENDPOINT)
     .config("spark.hadoop.fs.s3a.access.key", MINIO_ACCESS_KEY)
     .config("spark.hadoop.fs.s3a.secret.key", MINIO_SECRET_KEY)
@@ -41,7 +40,7 @@ spark.sparkContext.setLogLevel("WARN")
 spark.sql(f"CREATE DATABASE IF NOT EXISTS {catalog_name}.{db}")
 
 WAREHOUSE_BUCKET = os.getenv("S3_BUCKET_WAREHOUSE", "warehouse")
-src_uri = f"s3://{WAREHOUSE_BUCKET}/{args.object_key}"
+src_uri = f"s3a://{WAREHOUSE_BUCKET}/{args.object_key}"
 reader = spark.read
 if args.format == "csv":
     reader = (reader

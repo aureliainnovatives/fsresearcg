@@ -24,8 +24,6 @@ services:
       DB_DRIVER: derby
     ports:
       - "9083:9083"
-    volumes:
-      - ./hive/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
     depends_on:
       - minio
     networks: [ core-net ]
