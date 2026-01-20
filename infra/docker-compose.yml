@@ -1,0 +1,94 @@
+version: "3.9"
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks: [ core-net ]
+
+  trino:
+    image: trinodb/trino:442
+    container_name: trino
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./trino/catalog:/etc/trino/catalog
+    environment:
+      - "JAVA_TOOL_OPTIONS=-Dhttp.proxyHost= -Dhttp.proxyPort="
+    env_file:
+      - ../.env
+      - ./.env
+    depends_on: [ minio ]
+    networks: [ core-net ]
+
+  spark:
+    image: apache/spark:3.5.0
+    container_name: spark
+    user: root
+    command: [ "/bin/bash", "-c", "sleep infinity" ]
+    stdin_open: true
+    tty: true
+    ports:
+      - "4040:4040"
+    volumes:
+      - ../:/app
+      - spark_events:/opt/spark/events
+    env_file:
+      - ../.env
+      - ./.env
+    depends_on: [ minio ]
+    networks: [ core-net ]
+
+  spark-history:
+    image: apache/spark:3.5.0
+    container_name: spark-history
+    user: root
+    depends_on: [ spark ]
+    ports:
+      - "18080:18080"
+    volumes:
+      - spark_events:/opt/spark/events
+    command: [ "/bin/bash", "-c", "/opt/spark/sbin/start-history-server.sh && tail -f /opt/spark/logs/*" ]
+    environment:
+      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark/events"
+    networks: [ core-net ]
+
+  api-gateway:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    env_file:
+      - ../.env
+      - ./.env
+    environment:
+      API_AUTH_TOKEN: ${API_AUTH_TOKEN}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_REGION: ${S3_REGION}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET_WAREHOUSE: ${S3_BUCKET_WAREHOUSE}
+      ML_ARTIFACTS_BUCKET: ${ML_ARTIFACTS_BUCKET}
+      TRINO_URL: ${TRINO_URL}
+    ports:
+      - "8000:8000"
+    depends_on: [ minio, trino ]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [ core-net ]
+
+volumes:
+  minio_data:
+  spark_events: {}
+
+networks:
+  core-net:
+    driver: bridge

@@ -1,0 +1,48 @@
+# Java
+*.jar
+target/
+
+# Logs
+.log
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv/
+pip-log.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Data
+*.parquet
+*.avro
+*.orc
+*.csv
+*.tsv
+*.jsonl
+*.db
+*.sqlite
+data/
+temp/
+
+# Spark
+spark-warehouse/
+metastore_db/
+derby.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
