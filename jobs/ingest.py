@@ -6,14 +6,14 @@ from pyspark.sql import SparkSession
 MINIO_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio:9000")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER", "minio")
 MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD", "minio123")
-WAREHOUSE_ROOT = os.getenv("ICEBERG_WAREHOUSE", "s3a://warehouse/iceberg")
+WAREHOUSE_ROOT = os.getenv("ICEBERG_WAREHOUSE", "s3://warehouse/iceberg")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--instance-id", required=True)
 parser.add_argument("--table", required=True)
 parser.add_argument("--object-key", required=True)   # e.g., uploads/123.csv
-parser.add_argument("--format", default="csv", choices=["csv","parquet"])
-parser.add_argument("--mode", default="overwrite", choices=["overwrite","append"])
+parser.add_argument("--format", default="csv")
+parser.add_argument("--mode", default="append")
 parser.add_argument("--header", default="true")
 parser.add_argument("--infer-schema", default="true")
 args = parser.parse_args()
