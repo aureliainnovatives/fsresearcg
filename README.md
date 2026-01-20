@@ -46,5 +46,3 @@ curl http://localhost:8000/v1/version
 
 ## Public API (M1 surface)
 See `docs/ARCHITECTURE.md` (Section 6).
-#added new branch
-#setup done
