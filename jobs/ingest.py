@@ -41,7 +41,7 @@ spark.sparkContext.setLogLevel("WARN")
 spark.sql(f"CREATE DATABASE IF NOT EXISTS {catalog_name}.{db}")
 
 WAREHOUSE_BUCKET = os.getenv("S3_BUCKET_WAREHOUSE", "warehouse")
-src_uri = f"s3a://{WAREHOUSE_BUCKET}/{args.object_key}"
+src_uri = f"s3://{WAREHOUSE_BUCKET}/{args.object_key}"
 reader = spark.read
 if args.format == "csv":
     reader = (reader
