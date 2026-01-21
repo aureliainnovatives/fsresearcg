@@ -56,6 +56,7 @@ services:
     volumes:
       - ./hive/hive-site.xml:/opt/hive/conf/hive-site.xml
       - ./hive/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./hive/lib/postgresql-42.7.2.jar:/opt/hive/lib/postgresql-42.7.2.jar
     depends_on:
       postgres:
         condition: service_healthy
