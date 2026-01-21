@@ -7,11 +7,11 @@
     </property>
     <property>
         <name>fs.s3a.access.key</name>
-        <value>${env.MINIO_ROOT_USER}</value>
+        <value>minio</value>
     </property>
     <property>
         <name>fs.s3a.secret.key</name>
-        <value>${env.MINIO_ROOT_PASSWORD}</value>
+        <value>minio123</value>
     </property>
     <property>
         <name>fs.s3a.path.style.access</name>
