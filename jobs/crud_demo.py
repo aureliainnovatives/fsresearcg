@@ -33,6 +33,13 @@ def run_crud_demo():
     print("--- 1. Creating Table and Inserting Data ---")
     data = [(1, "Alice", "active"), (2, "Bob", "inactive"), (3, "Charlie", "active")]
     df = spark.createDataFrame(data, ["id", "name", "status"])
+
+    # clean up previous run
+    spark.sql(f"DROP TABLE IF EXISTS {table_name}")
+    
+    # Ensure database exists with correct location (Critical for Hive)
+    spark.sql(f"CREATE DATABASE IF NOT EXISTS iceberg.default LOCATION '{WAREHOUSE_ROOT}/default'")
+    
     df.writeTo(table_name).createOrReplace()
     spark.table(table_name).show()
     
