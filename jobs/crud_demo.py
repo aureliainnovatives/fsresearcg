@@ -20,6 +20,7 @@ def get_spark_session(app_name):
         .config("spark.sql.catalog.iceberg.uri", "thrift://hive-metastore:9083")
         .config("spark.sql.catalog.iceberg.warehouse", WAREHOUSE_ROOT)
         .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions")
+        .config("spark.jars.packages", "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,org.apache.hadoop:hadoop-aws:3.3.4")
         .getOrCreate())
 
 def run_crud_demo():

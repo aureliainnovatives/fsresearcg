@@ -34,6 +34,7 @@ spark = (
     .config(f"spark.sql.catalog.{catalog_name}.type", "hive")
     .config(f"spark.sql.catalog.{catalog_name}.uri", "thrift://hive-metastore:9083")
     .config(f"spark.sql.catalog.{catalog_name}.warehouse", warehouse)
+    .config("spark.jars.packages", "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2,org.apache.hadoop:hadoop-aws:3.3.4")
     .getOrCreate()
 )
 spark.sparkContext.setLogLevel("WARN")
