@@ -1,5 +1,3 @@
-
-version: "3.9"
 services:
   minio:
     image: minio/minio:latest
@@ -31,16 +29,16 @@ services:
     networks: [ core-net ]
 
   spark:
-    image: bitnami/spark:3.5.1
+    image: bitnami/spark:3.5
     container_name: spark
-    command: ["bash", "-lc", "sleep infinity"]
+    command: [ "bash", "-lc", "sleep infinity" ]
     stdin_open: true
     tty: true
     ports:
       - "4040:4040"
     volumes:
       - ../:/app
-      - spark_events:/opt/spark-events     
+      - spark_events:/opt/spark-events
     env_file:
       - ../.env
       - ./.env
@@ -48,14 +46,14 @@ services:
     networks: [ core-net ]
 
   spark-history:
-    image: bitnami/spark:3.5.1
+    image: bitnami/spark:3.5
     container_name: spark-history
     depends_on: [ spark ]
     ports:
       - "18080:18080"
     volumes:
       - spark_events:/opt/spark-events
-    command: ["bash","-lc","/opt/bitnami/spark/sbin/start-history-server.sh && tail -f /opt/bitnami/spark/logs/*history*"]
+    command: [ "bash", "-lc", "/opt/bitnami/spark/sbin/start-history-server.sh && tail -f /opt/bitnami/spark/logs/*history*" ]
     environment:
       SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark-events"
     networks: [ core-net ]
@@ -84,7 +82,7 @@ services:
 
 volumes:
   minio_data:
-  spark_events: {} 
+  spark_events: {}
 
 networks:
   core-net:
