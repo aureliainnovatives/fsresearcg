@@ -49,7 +49,7 @@ services:
       AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
 
-      SKIP_SCHEMA_INIT: true # Add this line
+      SKIP_SCHEMA_INIT: "true" # Quoted to ensure it's passed as a string
 
     ports:
       - "9083:9083"
