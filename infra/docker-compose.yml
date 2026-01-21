@@ -12,6 +12,46 @@ services:
     volumes:
       - minio_data:/data
     networks: [ core-net ]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_DB: metastore
+      POSTGRES_USER: ${MINIO_ROOT_USER}
+      POSTGRES_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [ core-net ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${MINIO_ROOT_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  hive-metastore:
+    image: apache/hive:3.1.3
+    container_name: hive-metastore
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: "-Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/metastore -Djavax.jdo.option.ConnectionUserName=${MINIO_ROOT_USER} -Djavax.jdo.option.ConnectionPassword=${MINIO_ROOT_PASSWORD}"
+    ports:
+      - "9083:9083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ../.env
+      - ./.env
+    networks: [ core-net ]
 
   trino:
     image: trinodb/trino:442
@@ -25,7 +65,9 @@ services:
     env_file:
       - ../.env
       - ./.env
-    depends_on: [ minio ]
+    depends_on:
+      - minio
+      - hive-metastore
     networks: [ core-net ]
 
   spark:
@@ -85,6 +127,7 @@ services:
 volumes:
   minio_data:
   spark_events: {}
+  postgres_data: {}
 
 networks:
   core-net:
