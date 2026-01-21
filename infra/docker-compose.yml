@@ -48,6 +48,9 @@ services:
       HIVE_METASTORE_WAREHOUSE_DIR: s3a://warehouse/
       AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+
+      SKIP_SCHEMA_INIT: true # Add this line
+
     ports:
       - "9083:9083"
     volumes:
