@@ -1,7 +1,6 @@
+
 version: "3.9"
-
 services:
-
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -20,7 +19,7 @@ services:
     image: trinodb/trino:442
     container_name: trino
     ports:
-      - "8081:8080"
+      - "8080:8080"
     volumes:
       - ./trino/catalog:/etc/trino/catalog
     environment:
@@ -28,42 +27,37 @@ services:
     env_file:
       - ../.env
       - ./.env
-    depends_on:
-      - minio
+    depends_on: [ minio ]
     networks: [ core-net ]
 
   spark:
-    image: apache/spark:3.5.0
+    image: bitnami/spark:3.5.1
     container_name: spark
-    user: root
-    command: [ "/bin/bash", "-c", "sleep infinity" ]
+    command: ["bash", "-lc", "sleep infinity"]
     stdin_open: true
     tty: true
     ports:
       - "4040:4040"
     volumes:
       - ../:/app
-      - spark_events:/opt/spark/events
+      - spark_events:/opt/spark-events     
     env_file:
       - ../.env
       - ./.env
-    depends_on:
-      - minio
+    depends_on: [ minio ]
     networks: [ core-net ]
 
   spark-history:
-    image: apache/spark:3.5.0
+    image: bitnami/spark:3.5.1
     container_name: spark-history
-    user: root
-    depends_on:
-      - spark
+    depends_on: [ spark ]
     ports:
       - "18080:18080"
     volumes:
-      - spark_events:/opt/spark/events
-    command: [ "/bin/bash", "-c", "/opt/spark/sbin/start-history-server.sh && tail -f /opt/spark/logs/*" ]
+      - spark_events:/opt/spark-events
+    command: ["bash","-lc","/opt/bitnami/spark/sbin/start-history-server.sh && tail -f /opt/bitnami/spark/logs/*history*"]
     environment:
-      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark/events"
+      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark-events"
     networks: [ core-net ]
 
   api-gateway:
@@ -85,17 +79,12 @@ services:
       TRINO_URL: ${TRINO_URL}
     ports:
       - "8000:8000"
-    depends_on:
-      - minio
-      - trino
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on: [ minio, trino ]
     networks: [ core-net ]
 
 volumes:
   minio_data:
-  spark_events:
-
+  spark_events: {} 
 
 networks:
   core-net:

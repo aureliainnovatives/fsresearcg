@@ -11,9 +11,9 @@ WAREHOUSE_ROOT = os.getenv("ICEBERG_WAREHOUSE", "s3a://warehouse/iceberg")
 parser = argparse.ArgumentParser()
 parser.add_argument("--instance-id", required=True)
 parser.add_argument("--table", required=True)
-parser.add_argument("--object-key", required=True)
-parser.add_argument("--format", default="csv")
-parser.add_argument("--mode", default="append")
+parser.add_argument("--object-key", required=True)   # e.g., uploads/123.csv
+parser.add_argument("--format", default="csv", choices=["csv","parquet"])
+parser.add_argument("--mode", default="overwrite", choices=["overwrite","append"])
 parser.add_argument("--header", default="true")
 parser.add_argument("--infer-schema", default="true")
 args = parser.parse_args()
@@ -29,7 +29,6 @@ spark = (
     .config("spark.hadoop.fs.s3a.access.key", MINIO_ACCESS_KEY)
     .config("spark.hadoop.fs.s3a.secret.key", MINIO_SECRET_KEY)
     .config("spark.hadoop.fs.s3a.path.style.access", "true")
-    .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false")
     .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
     .config(f"spark.sql.catalog.{catalog_name}", "org.apache.iceberg.spark.SparkCatalog")
     .config(f"spark.sql.catalog.{catalog_name}.type", "hadoop")
@@ -38,8 +37,9 @@ spark = (
 )
 spark.sparkContext.setLogLevel("WARN")
 
-WAREHOUSE_BUCKET = os.getenv("S3_BUCKET_WAREHOUSE", "warehouse")
-src_uri = f"s3a://{WAREHOUSE_BUCKET}/{args.object_key}"
+spark.sql(f"CREATE DATABASE IF NOT EXISTS {catalog_name}.{db}")
+
+src_uri = f"s3a://warehouse/iceberg/{args.instance_id}/{args.object_key}"
 reader = spark.read
 if args.format == "csv":
     reader = (reader
