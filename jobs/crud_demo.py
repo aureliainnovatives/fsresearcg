@@ -6,7 +6,7 @@ from pyspark.sql.functions import col, lit
 MINIO_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio:9000")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER", "minio")
 MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD", "minio123")
-WAREHOUSE_ROOT = os.getenv("ICEBERG_WAREHOUSE", "s3a://warehouse/iceberg")
+WAREHOUSE_ROOT = os.getenv("ICEBERG_WAREHOUSE", "s3://warehouse/iceberg")
 
 def get_spark_session(app_name):
     return (SparkSession.builder.appName(app_name)
@@ -15,6 +15,7 @@ def get_spark_session(app_name):
         .config("spark.hadoop.fs.s3a.secret.key", MINIO_SECRET_KEY)
         .config("spark.hadoop.fs.s3a.path.style.access", "true")
         .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+        .config("spark.hadoop.fs.s3.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
         .config("spark.sql.catalog.iceberg", "org.apache.iceberg.spark.SparkCatalog")
         .config("spark.sql.catalog.iceberg.type", "hive")
         .config("spark.sql.catalog.iceberg.uri", "thrift://hive-metastore:9083")
