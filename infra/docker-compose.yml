@@ -29,9 +29,10 @@ services:
     networks: [ core-net ]
 
   spark:
-    image: bitnami/spark:3.5
+    image: apache/spark:3.5.3-python3
     container_name: spark
-    command: [ "bash", "-lc", "sleep infinity" ]
+    user: root
+    command: [ "bash", "-c", "sleep infinity" ]
     stdin_open: true
     tty: true
     ports:
@@ -46,14 +47,15 @@ services:
     networks: [ core-net ]
 
   spark-history:
-    image: bitnami/spark:3.5
+    image: apache/spark:3.5.3-python3
     container_name: spark-history
+    user: root
     depends_on: [ spark ]
     ports:
       - "18080:18080"
     volumes:
       - spark_events:/opt/spark-events
-    command: [ "bash", "-lc", "/opt/bitnami/spark/sbin/start-history-server.sh && tail -f /opt/bitnami/spark/logs/*history*" ]
+    command: [ "bash", "-c", "/opt/spark/sbin/start-history-server.sh && tail -f /opt/spark/logs/*history* || tail -f /dev/null" ]
     environment:
       SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark-events"
     networks: [ core-net ]
