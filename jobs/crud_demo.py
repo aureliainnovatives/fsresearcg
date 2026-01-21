@@ -28,7 +28,7 @@ def run_crud_demo():
     spark = get_spark_session("crud-demo")
     spark.sparkContext.setLogLevel("WARN")
     
-    table_name = "iceberg.default.customer_data"
+    table_name = "iceberg.demo.customer_data"
 
     print("--- 1. Creating Table and Inserting Data ---")
     data = [(1, "Alice", "active"), (2, "Bob", "inactive"), (3, "Charlie", "active")]
@@ -38,7 +38,8 @@ def run_crud_demo():
     spark.sql(f"DROP TABLE IF EXISTS {table_name}")
     
     # Ensure database exists with correct location (Critical for Hive)
-    spark.sql(f"CREATE DATABASE IF NOT EXISTS iceberg.default LOCATION '{WAREHOUSE_ROOT}/default'")
+    # We use 'demo' instead of 'default' to avoid legacy filesystem paths
+    spark.sql(f"CREATE DATABASE IF NOT EXISTS iceberg.demo LOCATION '{WAREHOUSE_ROOT}/demo'")
     
     df.writeTo(table_name).createOrReplace()
     spark.table(table_name).show()
