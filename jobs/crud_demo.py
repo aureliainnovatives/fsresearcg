@@ -55,7 +55,7 @@ def run_crud_demo():
     history_df.show(truncate=False)
     
     # Get the first snapshot ID
-    first_snapshot_id = history_df.sort("committed_at").first()["snapshot_id"]
+    first_snapshot_id = history_df.sort("made_current_at").first()["snapshot_id"]
     print(f"Reading from Snapshot ID: {first_snapshot_id}")
     
     spark.read \
