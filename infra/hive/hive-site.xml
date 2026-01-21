@@ -3,7 +3,7 @@
 <configuration>
     <property>
         <name>metastore.warehouse.dir</name>
-        <value>s3a://warehouse/</value>
+        <value>s3://warehouse/</value>
     </property>
     <property>
         <name>metastore.thrift.uris</name>
